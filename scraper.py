@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import logging
 from pprint import pprint
+import pandas as pd
 
 logging.basicConfig(
     filename='seo.log', 
@@ -12,6 +13,7 @@ logging.basicConfig(
 class Downloader:
     def __init__(self, url):
         self.url = url
+        self.df = pd.DataFrame()
 
     def load(self):
         page = requests.get(self.url)
@@ -20,7 +22,6 @@ class Downloader:
         # print(self.soup)
 
     def find(self, *args):
-        _dict = {}
         for tag in args:
             text_list = []
             _ = self.soup.find_all(tag)
@@ -29,6 +30,13 @@ class Downloader:
                 text = html_tag.getText()
                 # print(f"{tag} : {text}")
                 text_list.append(text)
-            _dict[tag] = text_list
+            # add df[tag] --> text_list or each text
 
-        pprint(_dict)
+        print(self.df)
+
+if __name__ == "__main__":
+    y = Downloader("https://kulturdata.de")
+    y.load()
+    y.find("title", "h1", "a")
+    
+
