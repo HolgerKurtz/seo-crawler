@@ -1,7 +1,7 @@
 # SEO Scraper by Holger Kurtz
 Tools for analysing a web pages structure
 
-## Input: UR
+## **Input: URL**
 Takes domain like "kulturdata" as an input
 
 ## Process:
@@ -23,7 +23,7 @@ Takes domain like "kulturdata" as an input
 
 4. Repeat
 
-## Output: 
+## **Output:** 
 - mind map that shows linked sitemap?
 - databse (csv?)
 - PDF with comments?
