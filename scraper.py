@@ -4,6 +4,8 @@ import logging
 from pprint import pprint
 import pandas as pd
 import sys
+import networkx as nx
+import matplotlib.pyplot as plt
 
 logging.basicConfig(
     filename='seo.log', 
@@ -26,7 +28,8 @@ class Downloader:
         self.link_list_set = set()
         self.scraped_list_set = set() # so I don't scrape urls twice 
         
-
+        self.graph_links_with_text = []
+    
     def load(self, url, domain):
         self.url = url
         self.domain = domain
@@ -45,14 +48,26 @@ class Downloader:
             try:
                 if (self.domain in link["href"]) and ("https" in link["href"]):
                     self.link_list_set.add(link["href"])
+
+                    # Adding for Graph
+                    self.graph_links_with_text.append([self.url, link["href"]])
                 else:
                     pass
             except:
                 pass
+    
+    def graph(self):
+        df = pd.DataFrame(self.graph_links_with_text, columns=["from", "to"])
+        G = nx.from_pandas_edgelist(df, source="from", target="to")
+        nx.draw(G, with_labels=False)
+        plt.show()
+
+        
 
 
-    def find(self, *args): #! Not clean
-        for tag in args:
+
+    def find(self, seo_tags):
+        for tag in seo_tags:
             try:
                 if tag == "description": # data is not a list so no loop or getText() needed
                     text = self.soup.find('meta', attrs={'name' : tag})["content"] 
@@ -68,7 +83,22 @@ class Downloader:
                         self.list_for_df.append([self.url, tag, text, text_len])
             except:
                 pass
-
+    def recurs(self):
+        print("Start")
+        for link in self.link_list_set.copy():
+            if str(link) in self.scraped_list_set.copy():
+                pass
+            else:
+                self.load(link, domain)
+                self.find(seo_tags)
+                self.next_link()
+        
+        print(f"🗳 Anzahl an gecrawlten Links : {len(self.scraped_list_set)}")        
+        if go():
+            print("Here we go again")
+            self.recurs()
+        else:
+            pass
 
     def create_df(self):
         columns = ["url", "html-tag" , "text", "character count"]
@@ -85,30 +115,15 @@ class Downloader:
 if __name__ == "__main__":
     url = "https://www.kulturdata.de"
     domain = "kulturdata.de"
+    seo_tags = ["title", "description"]
     y = Downloader()
     y.load(url, domain)
-    y.find("title", "description")
+    y.find(seo_tags)
     y.next_link()
 
-    def recurs():
-        print("Start")
-        for link in y.link_list_set.copy():
-            if str(link) in y.scraped_list_set.copy():
-                pass
-            else:
-                y.load(link, domain)
-                y.find("title", "description")
-                y.next_link()
-        
-        print(f"🗳 Anzahl an gecrawlten Links : {len(y.scraped_list_set)}")        
-        if go():
-            print("Here we go again")
-            recurs()
-        else:
-            y.create_df()
-
-    recurs()
-
+    y.recurs()
+    y.graph() # not that intereseting at the moment 
+    y.create_df()
     
 
     
