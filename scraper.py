@@ -13,7 +13,7 @@ logging.basicConfig(
 class Downloader:
     def __init__(self, url):
         self.url = url
-        self.df = pd.DataFrame()
+        self.list_for_df = []
 
     def load(self):
         page = requests.get(self.url)
@@ -21,22 +21,38 @@ class Downloader:
         self.soup = BeautifulSoup(page.content, 'html.parser', from_encoding="utf-8")
         # print(self.soup)
 
-    def find(self, *args):
+    def find(self, *args): #! Not clean
         for tag in args:
-            text_list = []
-            _ = self.soup.find_all(tag)
-            
-            for html_tag in _:
-                text = html_tag.getText()
-                # print(f"{tag} : {text}")
-                text_list.append(text)
-            # add df[tag] --> text_list or each text
+            if tag == "description": # data is not a list so no loop or getText() needed
+                text = self.soup.find('meta', attrs={'name' : tag})["content"] 
+                text_len = len(text)
+                # Add new list with seo data to self.list_for_df
+                self.list_for_df.append([self.url, tag, text, text_len])
+            else:
+                _ = self.soup.find_all(tag)
+                for html_tag in _:
+                    text = html_tag.getText()
+                    text_len = len(text) # character count
+                    # Add new list with seo data to self.list_for_df
+                    self.list_for_df.append([self.url, tag, text, text_len])
 
-        print(self.df)
 
+    def create_df(self):
+        columns = ["url", "html-tag" , "text", "character count"]
+        df = pd.DataFrame(self.list_for_df, columns=columns)
+        return print(df)
+
+        
+
+        
+    
+        
 if __name__ == "__main__":
     y = Downloader("https://kulturdata.de")
     y.load()
-    y.find("title", "h1", "a")
+    y.find("title", "h1", "h2", "a", "description" )
+    y.create_df()
+
+    
     
 
