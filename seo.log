@@ -1,6 +1,5 @@
-2020-11-30 16:28:50,113 - URL : https://m.muenchenmusik.de
-2020-11-30 16:28:50,453 - Status : 200
-2020-11-30 16:28:50,508 - df.head() : 
-                          url     html-tag                                               text  character count
-0  https://m.muenchenmusik.de        title  \n        Konzerte in München - Tickets bei Mü...               56
-1  https://m.muenchenmusik.de  description  Konzertkarten für klassische Musik in München ...              155
+2020-11-30 17:06:08,937 - URL : https://www.headstruggle.de
+2020-11-30 17:06:10,177 - Status : 200
+2020-11-30 17:06:10,224 - df.head() : 
+                           url html-tag                      text  character count
+0  https://www.headstruggle.de    title  The Struggles in my Head               24

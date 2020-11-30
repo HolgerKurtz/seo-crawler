@@ -14,10 +14,9 @@ logging.basicConfig(
 def go(): # user interface for testing 
         go = input("Go on? y/n ")
         if go == "y":
-            pass
+            return True
         elif go == "n":
-            print("Done.")
-            sys.exit()
+            return False
         else:
             go()     
 
@@ -38,21 +37,21 @@ class Downloader:
         self.scraped_list_set.add(self.url)
 
     def next_link(self):
-        print(f"🤖 next_link --> {self.url}")
         links_list_raw = self.soup.find_all("a")
         
         # check if link is internal, if so : add to set
         for link in links_list_raw:
             try:
                 if self.url in link["href"]:
-                    # print(link["href"])
+                    print(link["href"])
                     self.link_list_set.add(link["href"])
+                else:
+                    pass
             except:
                 pass
 
 
     def find(self, *args): #! Not clean
-        print(f"args/tags : {args} for {self.url}")
         for tag in args:
             try:
                 if tag == "description": # data is not a list so no loop or getText() needed
@@ -84,11 +83,21 @@ class Downloader:
     
         
 if __name__ == "__main__":
-    domain = "https://m.muenchenmusik.de"
+    domain = "https://www.headstruggle.de"
     y = Downloader()
     y.load(domain)
     y.find("title", "description")
     y.next_link()
+
+    def recurs():
+        for link in y.link_list_set.copy():
+            if str(link) in y.scraped_list_set.copy():
+                pass
+            else:
+                y.load(link)
+                y.find("title", "description")
+                y.next_link()
+    recurs()
     y.create_df()
     
 
