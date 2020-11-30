@@ -12,11 +12,11 @@ logging.basicConfig(
 )
 
 def go(): # user interface for testing 
-        go = input("Go on? y/n")
+        go = input("Go on? y/n ")
         if go == "y":
             pass
         elif go == "n":
-            print("Scraping wird beendet")
+            print("Done.")
             sys.exit()
         else:
             go()     
@@ -25,7 +25,7 @@ class Downloader:
     def __init__(self):
         self.list_for_df = []
         self.link_list_set = set()
-        self.scraped_list_set = set()
+        self.scraped_list_set = set() # so I don't scrape urls twice 
         
 
     def load(self, url):
@@ -35,8 +35,10 @@ class Downloader:
         page = requests.get(self.url)
         logging.info(f"Status : {page.status_code}")
         self.soup = BeautifulSoup(page.content, 'html.parser', from_encoding="utf-8")
+        self.scraped_list_set.add(self.url)
 
     def next_link(self):
+        print(f"🤖 next_link --> {self.url}")
         links_list_raw = self.soup.find_all("a")
         
         # check if link is internal, if so : add to set
@@ -50,7 +52,7 @@ class Downloader:
 
 
     def find(self, *args): #! Not clean
-        logging.info(f"args/tags : {args}")
+        print(f"args/tags : {args} for {self.url}")
         for tag in args:
             try:
                 if tag == "description": # data is not a list so no loop or getText() needed
@@ -82,18 +84,11 @@ class Downloader:
     
         
 if __name__ == "__main__":
-    domain = "https://kulturdata.de"
-    
+    domain = "https://m.muenchenmusik.de"
     y = Downloader()
     y.load(domain)
     y.find("title", "description")
     y.next_link()
-
-    for url in y.link_list_set:
-        print(f"URL : {url}")
-        y.load(url)
-        y.find("title", "description")
-
     y.create_df()
     
 
