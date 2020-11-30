@@ -27,8 +27,9 @@ class Downloader:
         self.scraped_list_set = set() # so I don't scrape urls twice 
         
 
-    def load(self, url):
+    def load(self, url, domain):
         self.url = url
+        self.domain = domain
         logging.info(f"URL : {self.url}")
 
         page = requests.get(self.url)
@@ -42,8 +43,7 @@ class Downloader:
         # check if link is internal, if so : add to set
         for link in links_list_raw:
             try:
-                if self.url in link["href"]:
-                    print(link["href"])
+                if (self.domain in link["href"]) and ("https" in link["href"]):
                     self.link_list_set.add(link["href"])
                 else:
                     pass
@@ -83,22 +83,32 @@ class Downloader:
     
         
 if __name__ == "__main__":
-    domain = "https://www.headstruggle.de"
+    url = "https://www.kulturdata.de"
+    domain = "kulturdata.de"
     y = Downloader()
-    y.load(domain)
+    y.load(url, domain)
     y.find("title", "description")
     y.next_link()
 
     def recurs():
+        print("Start")
         for link in y.link_list_set.copy():
             if str(link) in y.scraped_list_set.copy():
                 pass
             else:
-                y.load(link)
+                y.load(link, domain)
                 y.find("title", "description")
                 y.next_link()
+        
+        print(f"🗳 Anzahl an gecrawlten Links : {len(y.scraped_list_set)}")        
+        if go():
+            print("Here we go again")
+            recurs()
+        else:
+            y.create_df()
+
     recurs()
-    y.create_df()
+
     
 
     
