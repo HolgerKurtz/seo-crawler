@@ -1,11 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
 import logging
-from pprint import pprint
 import pandas as pd
 import sys
-import networkx as nx
-import matplotlib.pyplot as plt
 
 logging.basicConfig(
     filename='seo.log', 
@@ -61,11 +58,10 @@ class Scraper:
         logging.info(f"{len(links_list_raw)} Links found : \n{links_list_raw}")
     
     def graph(self):
-        df = pd.DataFrame(self.graph_links_with_text, columns=["from", "to"])
+        # Excel for Visualization with Gephi
+        # See https://searchengineland.com/easy-visualizations-pagerank-page-groups-gephi-265716 
+        df = pd.DataFrame(self.graph_links_with_text, columns=["Source", "Target"])
         self.create_excel(df, "seo-graph.xlsx")
-        G = nx.from_pandas_edgelist(df, source="from", target="to")
-        nx.draw(G, with_labels=False)
-        plt.show()
 
     def find(self, seo_tags):
         for tag in seo_tags:
