@@ -31,7 +31,7 @@ class Downloader:
         self.graph_links_with_text = []
     
     def load(self, url, domain):
-        self.url = url
+        self.url = url # dynamic for recursive calling with different urls 
         self.domain = domain
         logging.info(f"URL : {self.url}")
 
@@ -48,13 +48,18 @@ class Downloader:
             try:
                 if (self.domain in link["href"]) and ("https" in link["href"]):
                     self.link_list_set.add(link["href"])
+                    self.graph_links_with_text.append([self.url, link["href"]]) # for graph()
 
-                    # Adding for Graph
-                    self.graph_links_with_text.append([self.url, link["href"]])
+                elif link["href"].startswith("/"): # relative paths like /impressum instead of www.domain.de/impressum
+                    rel_path = "https://www." + self.domain + link["href"]
+                    self.link_list_set.add(rel_path)
+                    self.graph_links_with_text.append([self.url, rel_path])
+
                 else:
                     pass
             except:
                 pass
+        logging.info(f"URL : {self.url}\nLinks found : \n{self.link_list_set}")
     
     def graph(self):
         df = pd.DataFrame(self.graph_links_with_text, columns=["from", "to"])
@@ -89,9 +94,13 @@ class Downloader:
             if str(link) in self.scraped_list_set.copy():
                 pass
             else:
-                self.load(link, domain)
-                self.find(seo_tags)
-                self.next_link()
+                if requests.get(link).status_code == 200:
+                    self.load(link, domain)
+                    self.find(seo_tags)
+                    self.next_link()
+                else:
+                    print(f"❌ Status Code von {link} : {requests.get(link).status_code}")
+            
         
         print(f"🗳 Anzahl an gecrawlten Links : {len(self.scraped_list_set)}")        
         if go():
@@ -113,9 +122,9 @@ class Downloader:
     
         
 if __name__ == "__main__":
-    url = "https://www.kulturdata.de"
+    url = "https://kulturdata.de"
     domain = "kulturdata.de"
-    seo_tags = ["title", "description"]
+    seo_tags = ["title", "description", "h1", "h2"]
     y = Downloader()
     y.load(url, domain)
     y.find(seo_tags)
