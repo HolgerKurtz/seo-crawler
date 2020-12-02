@@ -3,6 +3,8 @@ import requests
 import logging
 import pandas as pd
 import sys
+from random import randint
+from time import sleep
 
 logging.basicConfig(
     filename='seo.log', 
@@ -28,6 +30,9 @@ class Scraper:
         self.graph_links_with_text = []
     
     def load(self, url):
+        rand_sek = randint(1,3)
+        print(f"Sleeping for {rand_sek} seconds")
+        sleep(rand_sek)
         self.url = url # dynamic for recursive calling with different urls 
         logging.info(f"URL : {self.url}")
 
@@ -87,12 +92,12 @@ class Scraper:
             if str(link) in self.scraped_list_set.copy():
                 pass
             else:
-                if requests.get(link).status_code == 200:
+                try:
                     self.load(link)
                     self.find(seo_tags)
                     self.next_link()
-                else:
-                    print(f"❌ Status Code von {link} : {requests.get(link).status_code}")
+                except:
+                    print(f"❌ Status Code für Link {link}")
             
         print(f"🗳 Anzahl an gecrawlten Links : {len(self.scraped_list_set)}")        
         
@@ -115,9 +120,9 @@ class Scraper:
     
         
 if __name__ == "__main__":
-    url = "https://kulturdata.de"
-    domain = "kulturdata.de"
-    seo_tags = ["title"]
+    url = "https://www.muenchenmusik.de"
+    domain = "muenchenmusik.de"
+    seo_tags = ["title", "description", "h1" , "h2"]
     y = Scraper(domain)
     y.load(url)
     y.find(seo_tags)
