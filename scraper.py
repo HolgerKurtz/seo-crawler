@@ -5,6 +5,7 @@ import pandas as pd
 import sys
 from random import randint
 from time import sleep
+from progress_bar import progress_bar # you need to pip install tqdm 
 
 logging.basicConfig(
     filename='seo.log', 
@@ -13,7 +14,7 @@ logging.basicConfig(
 )
 
 def go(): # user interface for testing 
-        go = input("Go on? y/n ")
+        go = input("\n======> Go on? y/n ")
         if go == "y":
             return True
         elif go == "n":
@@ -30,8 +31,7 @@ class Scraper:
         self.graph_links_with_text = []
     
     def load(self, url):
-        rand_sek = randint(1,3)
-        print(f"Sleeping for {rand_sek} seconds")
+        rand_sek = randint(0,2)
         sleep(rand_sek)
         self.url = url # dynamic for recursive calling with different urls 
         logging.info(f"URL : {self.url}")
@@ -87,8 +87,18 @@ class Scraper:
                 pass
 
     def recurs(self):
-        print("Start")
+        # Show the progress 
+        print("Starting …")
+        amount = len(self.link_list_set)
+        scraped = len(self.scraped_list_set)
+        print(f"=====\nOverall Progress for {self.domain}")
+        progress_bar(scraped, amount)
+        print("=====")
+        count = 0
+
         for link in self.link_list_set.copy():
+            count +=1
+            progress_bar(count, amount)
             if str(link) in self.scraped_list_set.copy():
                 pass
             else:
@@ -97,9 +107,7 @@ class Scraper:
                     self.find(seo_tags)
                     self.next_link()
                 except:
-                    print(f"❌ Status Code für Link {link}")
-            
-        print(f"🗳 Anzahl an gecrawlten Links : {len(self.scraped_list_set)}")        
+                    print(f"❌ Status Code für Link {link}")      
         
         # Enjoyed the Ride?
         if go():
@@ -111,7 +119,6 @@ class Scraper:
     def create_df(self):
         columns = ["url", "html-tag" , "text", "character count"]
         df = pd.DataFrame(self.list_for_df, columns=columns)
-        logging.info(f"df.head() : \n{df.head()}")
         self.create_excel(df, "seo.xlsx")
     
     def create_excel(self, df, filename):
@@ -120,8 +127,8 @@ class Scraper:
     
         
 if __name__ == "__main__":
-    url = "https://www.muenchenmusik.de"
-    domain = "muenchenmusik.de"
+    url = "https://kulturdata.de"
+    domain = "kulturdata.de"
     seo_tags = ["title", "description", "h1" , "h2"]
     y = Scraper(domain)
     y.load(url)
