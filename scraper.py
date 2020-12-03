@@ -85,15 +85,12 @@ class Scraper:
                         self.list_for_df.append([self.url, tag, text, text_len])
             except:
                 pass
-
-    def recurs(self):
-
+    def progress_info(self):
         # Show the progress 
-        amount = len(self.link_list_set)
+        self.amount = len(self.link_list_set)
         scraped = len(self.scraped_list_set)
         print(f"=====\nOverall Progress for {self.domain}")
-        progress_bar(scraped, amount)
-        count = 0
+        progress_bar(scraped, self.amount)
         old = 0
 
         for link in self.link_list_set:
@@ -101,7 +98,7 @@ class Scraper:
                 old +=1 
             else:
                 pass
-        diff = amount - old
+        diff = self.amount - old
         print("=====")
         print(f"{diff} new links found and ready for scraping")
 
@@ -112,11 +109,13 @@ class Scraper:
             y.graph() # not that intereseting at the moment 
             y.create_df()
             sys.exit()
-            
 
+    def recurs(self):
+        self.progress_info()
+        count = 0
         for link in self.link_list_set.copy():
             count +=1
-            progress_bar(count, amount)
+            progress_bar(count, self.amount)
             if str(link) in self.scraped_list_set.copy():
                 pass
             else:
