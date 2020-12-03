@@ -105,6 +105,15 @@ class Scraper:
         print("=====")
         print(f"{diff} new links found and ready for scraping")
 
+        if go():
+            print("Let's go!")
+            pass
+        else:
+            y.graph() # not that intereseting at the moment 
+            y.create_df()
+            sys.exit()
+            
+
         for link in self.link_list_set.copy():
             count +=1
             progress_bar(count, amount)
@@ -118,12 +127,8 @@ class Scraper:
                 except:
                     print(f"❌ Status Code für Link {link}")      
         
-        # Enjoyed the Ride?
-        if go():
-            print("Here we go again")
-            self.recurs()
-        else:
-            pass
+        # Starting again 
+        self.recurs()
 
     def create_df(self):
         columns = ["url", "html-tag" , "text", "character count"]
