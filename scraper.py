@@ -87,14 +87,23 @@ class Scraper:
                 pass
 
     def recurs(self):
+
         # Show the progress 
-        print("Starting …")
         amount = len(self.link_list_set)
         scraped = len(self.scraped_list_set)
         print(f"=====\nOverall Progress for {self.domain}")
         progress_bar(scraped, amount)
-        print("=====")
         count = 0
+        old = 0
+
+        for link in self.link_list_set:
+            if str(link) in self.scraped_list_set:
+                old +=1 
+            else:
+                pass
+        diff = amount - old
+        print("=====")
+        print(f"{diff} new links found and ready for scraping")
 
         for link in self.link_list_set.copy():
             count +=1
