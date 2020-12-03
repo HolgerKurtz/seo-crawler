@@ -140,15 +140,22 @@ class Scraper:
     
         
 if __name__ == "__main__":
+    # Variables to choose
     url = "https://kulturdata.de"
     domain = "kulturdata.de"
     seo_tags = ["title", "description", "h1" , "h2"]
+
+    # initial scrape
     y = Scraper(domain)
     y.load(url)
     y.find(seo_tags)
     y.next_link()
+
+    # starting the Recursion to loop through internal links
     y.recurs()
-    y.graph() # not that intereseting at the moment 
+
+    # Safe data for analysis and gephi visualization
+    y.graph()
     y.create_df()
     
 
