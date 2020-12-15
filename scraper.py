@@ -36,11 +36,17 @@ class Scraper:
         self.url = url # dynamic for recursive calling with different urls 
         logging.info(f"URL : {self.url}")
 
-        page = requests.get(self.url)
+        page = requests.get(self.url, verify=False)
         logging.info(f"Status : {page.status_code}")
         
         self.soup = BeautifulSoup(page.content, 'html.parser', from_encoding="utf-8")
         self.scraped_list_set.add(self.url)
+        try:
+            not_indexable = self.soup.find('meta', attrs={'name' : "robots"})["content"] # if indexable then == None
+            print(f"🤖 --> {not_indexable}")
+            return True
+        except:
+            return False
 
     def next_link(self):
         links_list_raw = self.soup.find_all("a")
@@ -114,17 +120,20 @@ class Scraper:
         self.progress_info()
         count = 0
         for link in self.link_list_set.copy():
+            print(f"Link : {link}")
             count +=1
             progress_bar(count, self.amount)
-            if str(link) in self.scraped_list_set.copy():
-                pass
-            else:
-                try:
+            try:
+                if str(link) in self.scraped_list_set.copy():
+                    pass
+                elif self.load(link): # load(link) grabs robots to see if no-index in it if so, skip link
+                    pass
+                else:
                     self.load(link)
                     self.find(seo_tags)
                     self.next_link()
-                except:
-                    print(f"❌ Status Code für Link {link}")      
+            except:
+                print(f"❌ Status Code für Link {link}")      
         
         # Starting again 
         self.recurs()
@@ -141,9 +150,9 @@ class Scraper:
         
 if __name__ == "__main__":
     # Variables to choose
-    url = "https://kulturdata.de"
-    domain = "kulturdata.de"
-    seo_tags = ["title", "description", "h1" , "h2"]
+    url = "https://www.onelogic.de"
+    domain = "onelogic.de"
+    seo_tags = ["title", "description", "h1" , "h2", "h3"]
 
     # initial scrape
     y = Scraper(domain)
@@ -153,10 +162,6 @@ if __name__ == "__main__":
 
     # starting the Recursion to loop through internal links
     y.recurs()
-
-    # Safe data for analysis and gephi visualization
-    y.graph()
-    y.create_df()
     
 
     
