@@ -43,8 +43,11 @@ class Scraper:
         self.scraped_list_set.add(self.url)
         try:
             not_indexable = self.soup.find('meta', attrs={'name' : "robots"})["content"] # if indexable then == None
-            print(f"🤖 --> {not_indexable}")
-            return True
+            if "noindex" in not_indexable:
+                print(f"🤖 --> {not_indexable}")
+                return True
+            else:
+                return False
         except:
             return False
 
@@ -72,7 +75,7 @@ class Scraper:
         # Excel for Visualization with Gephi
         # See https://searchengineland.com/easy-visualizations-pagerank-page-groups-gephi-265716 
         df = pd.DataFrame(self.graph_links_with_text, columns=["Source", "Target"])
-        self.create_excel(df, "seo-graph.xlsx")
+        self.create_csv(df, "seo-graph.csv")
 
     def find(self, seo_tags):
         for tag in seo_tags:
@@ -113,7 +116,7 @@ class Scraper:
             pass
         else:
             y.graph() # not that intereseting at the moment 
-            y.create_df()
+            # y.create_df()
             sys.exit()
 
     def recurs(self):
@@ -131,7 +134,12 @@ class Scraper:
                 else:
                     self.load(link)
                     self.find(seo_tags)
+                    
+                    df = self.create_df()
+                    self.create_csv(df, "seo.csv", "a", False)
+
                     self.next_link()
+                    
             except:
                 print(f"❌ Status Code für Link {link}")      
         
@@ -141,10 +149,10 @@ class Scraper:
     def create_df(self):
         columns = ["url", "html-tag" , "text", "character count"]
         df = pd.DataFrame(self.list_for_df, columns=columns)
-        self.create_excel(df, "seo.xlsx")
+        return df
     
-    def create_excel(self, df, filename):
-        df.to_excel(filename)
+    def create_csv(self, df, filename, mode="w", header=True):
+        df.to_csv(filename, mode=mode, header=header)
         print(f"Excel File created. Filename: {filename}")
     
         
@@ -158,6 +166,8 @@ if __name__ == "__main__":
     y = Scraper(domain)
     y.load(url)
     y.find(seo_tags)
+    df = y.create_df()
+    y.create_csv(df, "seo.csv")
     y.next_link()
 
     # starting the Recursion to loop through internal links

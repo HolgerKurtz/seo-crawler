@@ -2,7 +2,6 @@
 env
 .vscode/
 seo.log
-seo.xlsx
-seo-graph.xlsx
+*.csv
 kulturdata-internal-link.pdf
 __pycache__/
