@@ -24,6 +24,8 @@ def go(): # user interface for testing
 
 class Scraper:
     def __init__(self, domain):
+        self.seo_file = str(domain) + ".csv"
+        self.seo_graph_file = str(domain) + "_graph" + ".csv"
         self.domain = domain
         self.list_for_df = []
         self.link_list_set = set()
@@ -75,7 +77,7 @@ class Scraper:
         # Excel for Visualization with Gephi
         # See https://searchengineland.com/easy-visualizations-pagerank-page-groups-gephi-265716 
         df = pd.DataFrame(self.graph_links_with_text, columns=["Source", "Target"])
-        self.create_csv(df, "seo-graph.csv")
+        self.create_csv(df, self.seo_graph_file)
 
     def find(self, seo_tags):
         for tag in seo_tags:
@@ -116,7 +118,6 @@ class Scraper:
             pass
         else:
             y.graph() # not that intereseting at the moment 
-            # y.create_df()
             sys.exit()
 
     def recurs(self):
@@ -136,7 +137,7 @@ class Scraper:
                     self.find(seo_tags)
                     
                     df = self.create_df()
-                    self.create_csv(df, "seo.csv", "a", False)
+                    self.create_csv(df, self.seo_file, "a", False)
 
                     self.next_link()
                     
@@ -148,7 +149,8 @@ class Scraper:
 
     def create_df(self):
         columns = ["url", "html-tag" , "text", "character count"]
-        df = pd.DataFrame(self.list_for_df, columns=columns)
+        unique_list = [list(x) for x in set(tuple(x) for x in self.list_for_df)] # From https://stackoverflow.com/questions/3724551/python-uniqueness-for-list-of-lists
+        df = pd.DataFrame(unique_list, columns=columns)
         return df
     
     def create_csv(self, df, filename, mode="w", header=True):
@@ -158,8 +160,8 @@ class Scraper:
         
 if __name__ == "__main__":
     # Variables to choose
-    url = "https://www.onelogic.de"
-    domain = "onelogic.de"
+    url = "https://www.muenchenevent.de"
+    domain = "muenchenevent.de"
     seo_tags = ["title", "description", "h1" , "h2", "h3"]
 
     # initial scrape
@@ -167,7 +169,7 @@ if __name__ == "__main__":
     y.load(url)
     y.find(seo_tags)
     df = y.create_df()
-    y.create_csv(df, "seo.csv")
+    y.create_csv(df, y.seo_file)
     y.next_link()
 
     # starting the Recursion to loop through internal links
