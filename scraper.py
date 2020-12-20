@@ -33,8 +33,8 @@ class Scraper:
         self.graph_links_with_text = []
     
     def load(self, url):
-        rand_sek = randint(0,2)
-        sleep(rand_sek)
+        # rand_sek = randint(0,2)
+        # sleep(rand_sek)
         self.url = url # dynamic for recursive calling with different urls 
         logging.info(f"URL : {self.url}")
 
@@ -118,6 +118,8 @@ class Scraper:
             pass
         else:
             y.graph() # not that intereseting at the moment 
+            df = self.create_df()
+            self.create_csv(df, self.seo_file)
             sys.exit()
 
     def recurs(self):
@@ -128,7 +130,7 @@ class Scraper:
             count +=1
             progress_bar(count, self.amount)
             try:
-                if str(link) in self.scraped_list_set.copy():
+                if link in self.scraped_list_set.copy():
                     pass
                 elif self.load(link): # load(link) grabs robots to see if no-index in it if so, skip link
                     pass
@@ -136,8 +138,8 @@ class Scraper:
                     self.load(link)
                     self.find(seo_tags)
                     
-                    df = self.create_df()
-                    self.create_csv(df, self.seo_file, "a", False)
+                    # df = self.create_df()
+                    # self.create_csv(df, self.seo_file, "a", False)
 
                     self.next_link()
                     
@@ -149,8 +151,11 @@ class Scraper:
 
     def create_df(self):
         columns = ["url", "html-tag" , "text", "character count"]
-        unique_list = [list(x) for x in set(tuple(x) for x in self.list_for_df)] # From https://stackoverflow.com/questions/3724551/python-uniqueness-for-list-of-lists
+        unique_list = self.list_for_df
+        # unique_list = [list(x) for x in set(tuple(x) for x in self.list_for_df)] # From https://stackoverflow.com/questions/3724551/python-uniqueness-for-list-of-lists
         df = pd.DataFrame(unique_list, columns=columns)
+        print(df)
+        print(df.describe())
         return df
     
     def create_csv(self, df, filename, mode="w", header=True):
